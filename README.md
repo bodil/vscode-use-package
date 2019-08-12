@@ -6,9 +6,6 @@ Programmatic configuration, extension management and keybinding for VS Code, to 
 This is heavily inspired by John Wiegley's [use-package](https://github.com/jwiegley/use-package)
 system for Emacs.
 
-Heavily inspired by John Wiegley's [use-package](https://github.com/jwiegley/use-package) system for
-Emacs.
-
 ## Usage
 
 `vscode-use-package` provides the `usePackage` function, which takes care of installing and
