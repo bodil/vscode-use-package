@@ -12,6 +12,9 @@
         "url": "https://github.com/bodil/vscode-use-package"
     },
     "main": "./out/main.js",
+    "files": [
+        "/out/**"
+    ],
     "scripts": {
         "prepublish": "npm run compile",
         "compile": "tsc -p ./",
