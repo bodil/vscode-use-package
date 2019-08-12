@@ -1,0 +1,32 @@
+{
+    "name": "vscode-use-package",
+    "description": "Programmatic configuration for VS Code.",
+    "version": "0.1.0",
+    "licence": "LGPL-3.0+",
+    "author": {
+        "name": "Bodil Stokke",
+        "url": "https://bodil.lol/"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/bodil/vscode-use-package"
+    },
+    "main": "./out/main.js",
+    "scripts": {
+        "prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "pretest": "npm run compile",
+        "test": "node ./out/test/runTest.js"
+    },
+    "dependencies": {
+        "@types/comment-json": "^1.1.1",
+        "@types/node": "^10.12.21",
+        "@types/vscode": "^1.36.0",
+        "comment-json": "^2.1.0"
+    },
+    "devDependencies": {
+        "typescript": "^3.3.1",
+        "tslint": "^5.12.1"
+    }
+}
