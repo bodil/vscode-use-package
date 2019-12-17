@@ -32,8 +32,10 @@ function writeFile(path: string, data: string): Promise<void> {
     );
 }
 
-function defer<A>(f: () => Thenable<A>): Thenable<A> {
-    return new Promise((resolve, reject) => setTimeout(() => f().then(resolve, reject), 0));
+function defer<A>(f: () => Thenable<A>, delay?: number): Thenable<A> {
+    return new Promise((resolve, reject) =>
+        setTimeout(() => f().then(resolve, reject), delay || 0)
+    );
 }
 
 async function installExtension(name: string) {
@@ -261,6 +263,16 @@ export async function configSet(
     }
 }
 
+type KeyboardQueue = {
+    items: Array<Keybinding>;
+    lock: boolean;
+};
+
+const keyboardQueue: KeyboardQueue = {
+    items: [],
+    lock: false,
+};
+
 function keyIndex(keymap: Array<Keybinding>, key: Keybinding): number | undefined {
     for (let i = 0; i < keymap.length; i++) {
         if (keymap[i] && keymap[i].key === key.key && keymap[i].when === key.when) {
@@ -279,7 +291,14 @@ function setKey(keymap: Array<Keybinding>, key: Keybinding) {
     }
 }
 
-export async function keymapSet(keymap: Array<Keybinding>) {
+async function keymapQueueRun() {
+    if (keyboardQueue.lock) {
+        return;
+    }
+    keyboardQueue.lock = true;
+    // Delay write by 100ms to let the maximum number
+    // of bindings queue up beforehand.
+    await defer(() => Promise.resolve(), 100);
     const masterPath = Path.resolve(
         getExtensionContext().globalStoragePath,
         "../../keybindings.json"
@@ -287,7 +306,9 @@ export async function keymapSet(keymap: Array<Keybinding>) {
     const originalData = await readFile(masterPath);
     const master = Json.parse(originalData);
 
-    for (const key of keymap) {
+    let count = keyboardQueue.items.length;
+    let key;
+    while ((key = keyboardQueue.items.pop())) {
         setKey(master, key);
     }
 
@@ -295,4 +316,15 @@ export async function keymapSet(keymap: Array<Keybinding>) {
     if (masterData !== originalData) {
         await writeFile(masterPath, masterData);
     }
+    keyboardQueue.lock = false;
+    if (keyboardQueue.items.length > 0) {
+        await keymapQueueRun();
+    }
+}
+
+export async function keymapSet(keymap: Array<Keybinding>) {
+    for (let key of keymap) {
+        keyboardQueue.items.push(key);
+    }
+    await keymapQueueRun();
 }
