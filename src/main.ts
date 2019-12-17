@@ -11,6 +11,8 @@ export type Keybinding = {
 };
 
 export type UsePackageOptions = {
+    local?: boolean;
+    remote?: string | boolean;
     scope?: string;
     config?: Record<string, any>;
     globalConfig?: Record<string, any>;
@@ -226,6 +228,18 @@ function getExtensionContext(): vscode.ExtensionContext {
 
 export async function usePackage(name: string, options?: UsePackageOptions): Promise<void> {
     options = options || {};
+    // If `local` is true and we're running on a remote, do nothing.
+    if (options.local === true && vscode.env.remoteName !== undefined) {
+        return;
+    }
+    // If `remote` is true and we're not running on a remote, do nothing.
+    if (options.remote === true && vscode.env.remoteName === undefined) {
+        return;
+    }
+    // If `remote` is a string and we're not running on a remote matching that string, do nothing.
+    if (typeof options.remote === "string" && options.remote !== vscode.env.remoteName) {
+        return;
+    }
     await install(name);
     const scope = options.scope || extensionName(name);
     if (options.config !== undefined) {

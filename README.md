@@ -39,6 +39,8 @@ The configuration object looks like this (and all the keys are optional):
 
 ```typescript
 export type UsePackageOptions = {
+    local?: boolean;
+    remote?: string | boolean;
     scope?: string;
     config?: Record<string, any>;
     globalConfig?: Record<string, any>;
@@ -46,6 +48,24 @@ export type UsePackageOptions = {
     init?: () => Thenable<void>;
 };
 ```
+
+#### `local` and `remote`
+
+If you pass the option `local: true`, this extension will not install on
+[remotes](https://code.visualstudio.com/docs/remote/remote-overview) such as WSL or an SSH host. If
+you pass `remote: true`, it will only install if you're running on a remote. This is useful if you
+have a single init script for all your development environments, but you use extensions which aren't
+designed to run either locally or remotely.
+
+Specifically, UI extensions have to be installed locally and cannot be installed at all by an init
+script running on a remote instance. You should therefore flag UI extensions `local: true` and make
+sure you run your init script locally before connecting to a remote host.
+
+With the `remote` property, you can also specify a string which will be matched against
+`vscode.env.remoteName`, so that you can eg. use `remote: "wsl"` to restrict an extension to only
+install on WSL remotes. Check the
+[VS Code API documentation](https://code.visualstudio.com/api/references/vscode-api#env) for more
+info on `vscode.env.remoteName`.
 
 #### `config`
 
