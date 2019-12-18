@@ -275,7 +275,12 @@ const keyboardQueue: KeyboardQueue = {
 
 function keyIndex(keymap: Array<Keybinding>, key: Keybinding): number | undefined {
     for (let i = 0; i < keymap.length; i++) {
-        if (keymap[i] && keymap[i].key === key.key && keymap[i].when === key.when) {
+        if (
+            keymap[i] &&
+            keymap[i].key === key.key &&
+            keymap[i].when === key.when &&
+            keymap[i].command === key.command
+        ) {
             return i;
         }
     }
