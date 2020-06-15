@@ -95,18 +95,17 @@ const queue: Queue = {
 };
 
 function buildProgressBar(
-    progress: vscode.Progress<{ increment: number; message: string }>,
-    total: number
+    progress: vscode.Progress<{ increment: number; message: string }>
 ): ProgressBar {
     return {
         progress,
         total: queue.scheduled,
         message: undefined,
-        report: function(message) {
+        report: function (message) {
             this.progress.report({ increment: 0, message });
             this.message = message;
         },
-        increment: function() {
+        increment: function () {
             this.progress.report({
                 increment: 100 / this.total,
                 message: this.message || "",
@@ -127,11 +126,11 @@ async function processQueue() {
             location: vscode.ProgressLocation.Notification,
             title: "Use-Package",
         },
-        async function(
+        async function (
             progress: vscode.Progress<{ increment: number; message: string }>,
             _token: vscode.CancellationToken
         ) {
-            queue.progress = buildProgressBar(progress, queue.items.length);
+            queue.progress = buildProgressBar(progress);
             await processStep();
         }
     );
@@ -210,7 +209,7 @@ function extensionName(name: string): string {
 
 let extensionContext: vscode.ExtensionContext | undefined = undefined;
 
-export function initUsePackage(context: vscode.ExtensionContext) {
+export function initUsePackage(context: vscode.ExtensionContext): void {
     extensionContext = context;
 }
 
@@ -259,7 +258,7 @@ export async function usePackage(name: string, options?: UsePackageOptions): Pro
 export async function configSet(
     scope: string | Record<string, any> | undefined,
     options?: Record<string, any>
-) {
+): Promise<void> {
     if (typeof scope === "object") {
         options = scope;
         scope = undefined;
@@ -325,7 +324,6 @@ async function keymapQueueRun() {
     const originalData = await readFile(masterPath);
     const master = Json.parse(originalData);
 
-    let count = keyboardQueue.items.length;
     let key;
     while ((key = keyboardQueue.items.pop())) {
         setKey(master, key);
@@ -341,8 +339,8 @@ async function keymapQueueRun() {
     }
 }
 
-export async function keymapSet(keymap: Array<Keybinding>) {
-    for (let key of keymap) {
+export async function keymapSet(keymap: Array<Keybinding>): Promise<void> {
+    for (const key of keymap) {
         keyboardQueue.items.push(key);
     }
     await keymapQueueRun();
